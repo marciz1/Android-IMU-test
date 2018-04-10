@@ -11,12 +11,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -63,6 +65,7 @@ public class SaveToFile implements Runnable, SensorEventListener {
     private String QuaternionString;
 
     private Queue<String> queue = new LinkedList<>();
+    private boolean deleteMarker;
 
     public SaveToFile(Context context, SensorManager senSensorManager) {
         this.context = context;
@@ -150,7 +153,7 @@ public class SaveToFile implements Runnable, SensorEventListener {
             TextView text = (TextView) QUATERNION;
             text.setText("QUATERION: w = " + Q[0] + " x = " + Q[1] + " y = " + Q[2] + " z = " + Q[3]);
 
-            QuaternionString = "QUATERION: w = " + Q[0] + " x = " + Q[1] + " y = " + Q[2] + " z = " + Q[3];
+            QuaternionString = Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3];
 
             lock.lock();
             try {
@@ -164,7 +167,6 @@ public class SaveToFile implements Runnable, SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         getValues(sensorEvent);
-        //Log.w("Sensor Changed", "Hello from sensor Changed");
     }
 
     @Override
@@ -172,15 +174,14 @@ public class SaveToFile implements Runnable, SensorEventListener {
     }
 
     public void run() {
-        //Log.w("Exeption", "Hello from thread");
-
+        deleteMarker = false;
         while (isRunning) {
             if (!queue.isEmpty()) {
 
                 lock.lock();
                 try {
 //                  Log.w("Quaternion", queue.poll());
-                    generateNoteOnSD("quaternion.txt", queue.poll());//nazwa pliku
+                    generateNoteOnSD("quaternion.txt", queue.poll());
                 } finally {
                     lock.unlock();
                 }
@@ -188,49 +189,30 @@ public class SaveToFile implements Runnable, SensorEventListener {
         }
     }
 
-//    void writeFile(String fileName, String data) {
-//        File outFile = new File("/mnt/sdcard/IMU/androidOutput.txt", fileName);
-//        FileOutputStream out = null;
-//        byte[] contents = data.getBytes();
-//
-//        try {
-//            out = new FileOutputStream(outFile, true);
-//            out.write(contents);
-//            out.flush();
-//            out.close();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
-    public void generateNoteOnSD(String sFileName, String sBody) {
+    public void generateNoteOnSD(String fileName, String fileBody) {
 
         try {
-            File root = new File(Environment.getExternalStorageDirectory(), "ImuTest1"); //nazwa folderu
+            File root = new File(Environment.getExternalStorageDirectory(), "ImuTest1");
             if (!root.exists()) {
                 root.mkdirs();
             }
 
-            File gpxfile = new File(root, sFileName);
+            File txtFile = new File(root, fileName);
 
-//            FileWriter writer = new FileWriter(gpxfile);
-//
-//            writer.append(sBody);
-//            writer.flush();
-//            writer.close();
+            FileWriter writer = new FileWriter(txtFile, true);
+            writer.append(fileBody + "\n");
+            writer.flush();
+            writer.close();
 
-
-            OutputStreamWriter out = new OutputStreamWriter(context.openFileOutput("quaternion2.txt", MODE_PRIVATE));
-
-            //write information to file
-            out.write("test");
-            out.write('\n');
-
-            //close file
-            out.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void deleteFile(){
+        File txtFile = new File(Environment.getExternalStorageDirectory() + "/ImuTest1", "quaternion.txt");
+        txtFile.delete();
     }
 }
 
