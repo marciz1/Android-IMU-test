@@ -6,29 +6,14 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.ReentrantLock;
-
-import static android.content.Context.MODE_PRIVATE;
-import static android.os.ParcelFileDescriptor.MODE_APPEND;
-
 
 /**
  * Created by marcin on 21.03.18.
@@ -36,10 +21,8 @@ import static android.os.ParcelFileDescriptor.MODE_APPEND;
 
 public class SaveToFile implements Runnable, SensorEventListener {
 
-    private Context context;
     private boolean isRunning;
     private final ReentrantLock lock = new ReentrantLock();
-
 
     private View textView;
     private View textView2;
@@ -47,28 +30,16 @@ public class SaveToFile implements Runnable, SensorEventListener {
     private View QUATERNION;
 
     private SensorManager senSensorManager;
-
     private Sensor senAccelerometer;
     private Sensor senGyroscope;
     private Sensor senMagnetometer;
     private Sensor senOrientation;
 
-    private float alastX, alastY, alastZ;
-    private float glastX, glastY, glastZ;
-    private float mlastX, mlastY, mlastZ;
-
-    private float aTimestamp = 0;
-    private float gTimestamp = 0;
-    private float mTimestamp = 0;
-
-    float[] Q = new float[4];
-    private String QuaternionString;
-
+    private float[] Q = new float[4];
     private Queue<String> queue = new LinkedList<>();
-    private boolean deleteMarker;
 
-    public SaveToFile(Context context, SensorManager senSensorManager) {
-        this.context = context;
+
+    public SaveToFile(SensorManager senSensorManager) {
         this.senSensorManager = senSensorManager;
         this.isRunning = true;
     }
@@ -102,59 +73,45 @@ public class SaveToFile implements Runnable, SensorEventListener {
 
 
     public void getValues(SensorEvent sensorEvent) {
+
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
-
-            alastX = x;
-            alastY = y;
-            alastZ = z;
-            aTimestamp = sensorEvent.timestamp;
+            float aTimestamp = sensorEvent.timestamp;
 
             TextView text = (TextView) textView;
-            text.setText("ACCELEROMETER: x = " + alastX + " y = " + alastY + " z = " + alastZ + " timestamp = " + aTimestamp);
-
+            text.setText("ACCELEROMETER: x = " + x + " y = " + y + " z = " + z + " timestamp = " + aTimestamp);
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
-
-            glastX = x;
-            glastY = y;
-            glastZ = z;
-            gTimestamp = sensorEvent.timestamp;
+            float gTimestamp = sensorEvent.timestamp;
 
             TextView text = (TextView) textView2;
-            text.setText("GYROSCOPE: x = " + glastX + " y = " + glastY + " z = " + glastZ + " timestamp = " + gTimestamp);
+            text.setText("GYROSCOPE: x = " + x + " y = " + y + " z = " + z + " timestamp = " + gTimestamp);
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             float x = sensorEvent.values[0];
             float y = sensorEvent.values[1];
             float z = sensorEvent.values[2];
-
-            mlastX = x;
-            mlastY = y;
-            mlastZ = z;
-            mTimestamp = sensorEvent.timestamp;
+            float mTimestamp = sensorEvent.timestamp;
 
             TextView text = (TextView) textView3;
-            text.setText("MAGNETOMETER: x = " + mlastX + " y = " + mlastY + " z = " + mlastZ + " timestamp = " + mTimestamp);
+            text.setText("MAGNETOMETER: x = " + x + " y = " + y + " z = " + z + " timestamp = " + mTimestamp);
 
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
 
             SensorManager.getQuaternionFromVector(Q, sensorEvent.values);
-
             TextView text = (TextView) QUATERNION;
             text.setText("QUATERION: w = " + Q[0] + " x = " + Q[1] + " y = " + Q[2] + " z = " + Q[3]);
 
-            QuaternionString = Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3];
-
+            String QuaternionString = Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3];
             lock.lock();
             try {
                 queue.add(QuaternionString);
@@ -174,13 +131,10 @@ public class SaveToFile implements Runnable, SensorEventListener {
     }
 
     public void run() {
-        deleteMarker = false;
         while (isRunning) {
             if (!queue.isEmpty()) {
-
                 lock.lock();
                 try {
-//                  Log.w("Quaternion", queue.poll());
                     generateNoteOnSD("quaternion.txt", queue.poll());
                 } finally {
                     lock.unlock();
@@ -189,11 +143,10 @@ public class SaveToFile implements Runnable, SensorEventListener {
         }
     }
 
-
     public void generateNoteOnSD(String fileName, String fileBody) {
 
         try {
-            File root = new File(Environment.getExternalStorageDirectory(), "ImuTest1");
+            File root = new File(Environment.getExternalStorageDirectory(), "IMU");
             if (!root.exists()) {
                 root.mkdirs();
             }
@@ -210,8 +163,8 @@ public class SaveToFile implements Runnable, SensorEventListener {
         }
     }
 
-    public void deleteFile(){
-        File txtFile = new File(Environment.getExternalStorageDirectory() + "/ImuTest1", "quaternion.txt");
+    public void deleteFile(String fileName){
+        File txtFile = new File(Environment.getExternalStorageDirectory() + "/IMU/" + fileName);
         txtFile.delete();
     }
 }

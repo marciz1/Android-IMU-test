@@ -4,18 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
-
-import java.io.File;
-import java.nio.file.Files;
-
 
 public class MainActivity extends Activity {
 
     private SensorManager senSensorManager;
     private SaveToFile saveToFile;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,29 +22,26 @@ public class MainActivity extends Activity {
         View QUATERNION = findViewById(R.id.QUATERNION);
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE); //initialize sensorManager(acces)
-        saveToFile = new SaveToFile(getApplicationContext(), senSensorManager);
-        saveToFile.deleteFile();
+
+        saveToFile = new SaveToFile(senSensorManager);
+        saveToFile.deleteFile("quaternion.txt");
         saveToFile.getTextViews(textView, textView2, textView3, QUATERNION);
         saveToFile.init();
-
-
 
         Thread thread = new Thread(saveToFile);
         thread.start();
     }
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        saveToFile.deleteFile();
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        saveToFile.deleteFile();
+        saveToFile.deleteFile("quaternion.txt");
         saveToFile.registerListeners();
     }
 
