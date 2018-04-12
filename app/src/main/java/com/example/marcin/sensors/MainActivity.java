@@ -4,12 +4,22 @@ import android.app.Activity;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
 
 public class MainActivity extends Activity {
 
     private SensorManager senSensorManager;
     private SaveToFile saveToFile;
+
+    private Socket socket;
+    private static final String SERVER_IP = "192.198.0.103";
+    private static final int SERVERPORT = 4444;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,8 +38,8 @@ public class MainActivity extends Activity {
         saveToFile.getTextViews(textView, textView2, textView3, QUATERNION);
         saveToFile.init();
 
-        Thread thread = new Thread(saveToFile);
-        thread.start();
+        new Thread(new ClientThread()).start();
+        new Thread(saveToFile).start();
     }
 
     @Override
@@ -50,4 +60,35 @@ public class MainActivity extends Activity {
         super.onPause();
         saveToFile.unregisterListeners();
     }
+
+    public class ClientThread implements Runnable{
+
+        @Override
+        public void run(){
+
+
+                try {
+                    socket = new Socket(SERVER_IP, SERVERPORT);
+                } catch (IOException e2) {
+                    e2.printStackTrace();
+                }
+
+
+                while(true) {
+                    try {
+                        InputStream in = socket.getInputStream();
+                        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+                        String test = br.readLine();
+                        Log.w("SERVER: ", test);
+
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+        }
+    }
 }
+
+
