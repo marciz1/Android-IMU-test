@@ -44,7 +44,7 @@ public class SaveToFile implements Runnable, SensorEventListener {
         this.isRunning = true;
     }
 
-    public void getTextViews(View textView, View textView2, View textView3, View QUATERNION) {
+    public void getTextViews(View QUATERNION) {
         this.textView = textView;
         this.textView2 = textView2;
         this.textView3 = textView3;
@@ -74,42 +74,16 @@ public class SaveToFile implements Runnable, SensorEventListener {
 
     public void getValues(SensorEvent sensorEvent) {
 
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = sensorEvent.values[0];
-            float y = sensorEvent.values[1];
-            float z = sensorEvent.values[2];
-            float aTimestamp = sensorEvent.timestamp;
-
-            TextView text = (TextView) textView;
-            text.setText("ACCELEROMETER: x = " + x + " y = " + y + " z = " + z + " timestamp = " + aTimestamp);
-        }
-
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            float x = sensorEvent.values[0];
-            float y = sensorEvent.values[1];
-            float z = sensorEvent.values[2];
-            float gTimestamp = sensorEvent.timestamp;
-
-            TextView text = (TextView) textView2;
-            text.setText("GYROSCOPE: x = " + x + " y = " + y + " z = " + z + " timestamp = " + gTimestamp);
-        }
-
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            float x = sensorEvent.values[0];
-            float y = sensorEvent.values[1];
-            float z = sensorEvent.values[2];
-            float mTimestamp = sensorEvent.timestamp;
-
-            TextView text = (TextView) textView3;
-            text.setText("MAGNETOMETER: x = " + x + " y = " + y + " z = " + z + " timestamp = " + mTimestamp);
-
-        }
-
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
 
             SensorManager.getQuaternionFromVector(Q, sensorEvent.values);
+            float qTimestamp = sensorEvent.timestamp;
             TextView text = (TextView) QUATERNION;
-            text.setText("QUATERION: w = " + Q[0] + " x = " + Q[1] + " y = " + Q[2] + " z = " + Q[3]);
+            text.setText("w = " + Q[0] +
+                    "\n x = " + Q[1] +
+                    "\n y = " + Q[2] +
+                    "\n z = " + Q[3] +
+                    "\n timestamp = " + qTimestamp);
 
             String QuaternionString = Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3];
             lock.lock();

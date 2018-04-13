@@ -7,23 +7,19 @@
 
 
     <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="50dp" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="50dp" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="match_parent"
-        android:layout_height="50dp" />
-
-    <TextView
         android:id="@+id/QUATERNION"
         android:layout_width="match_parent"
-        android:layout_height="50dp" />
+        android:layout_height="294dp"
+        android:textSize="50sp"
+        android:typeface="monospace" />
+
+    <TextView
+        android:id="@+id/CONNECTED"
+        android:layout_width="match_parent"
+        android:layout_height="122dp"
+        android:lineSpacingExtra="8sp"
+        android:textSize="50sp"
+        android:textStyle="bold"
+        android:typeface="monospace" />
 
 </LinearLayout>

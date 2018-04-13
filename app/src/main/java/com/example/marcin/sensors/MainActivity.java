@@ -6,11 +6,14 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class MainActivity extends Activity {
 
@@ -25,17 +28,15 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        View textView = findViewById(R.id.textView);
-        View textView2 = findViewById(R.id.textView2);
-        View textView3 = findViewById(R.id.textView3);
+        Log.w("SERVER: ", "logtest");
         View QUATERNION = findViewById(R.id.QUATERNION);
 
-        senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE); //initialize sensorManager(acces)
+
+        senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         saveToFile = new SaveToFile(senSensorManager);
         saveToFile.deleteFile("quaternion.txt");
-        saveToFile.getTextViews(textView, textView2, textView3, QUATERNION);
+        saveToFile.getTextViews(QUATERNION);
         saveToFile.init();
 
         new Thread(new ClientThread()).start();
@@ -65,28 +66,26 @@ public class MainActivity extends Activity {
 
         @Override
         public void run(){
-
-
+            while(true) {
                 try {
                     socket = new Socket(SERVER_IP, SERVERPORT);
-                } catch (IOException e2) {
-                    e2.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
-
-                while(true) {
+                InputStream in = null;
+                if(socket != null) {
                     try {
-                        InputStream in = socket.getInputStream();
+                        in = socket.getInputStream();
                         BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
                         String test = br.readLine();
                         Log.w("SERVER: ", test);
-
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
+
+            }
         }
     }
 }
