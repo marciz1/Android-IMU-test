@@ -38,6 +38,23 @@ public class SaveToFile implements Runnable, SensorEventListener {
     private float[] Q = new float[4];
     private Queue<String> queue = new LinkedList<>();
 
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(boolean running) {
+        isRunning = running;
+    }
 
     public SaveToFile(SensorManager senSensorManager) {
         this.senSensorManager = senSensorManager;
@@ -80,10 +97,10 @@ public class SaveToFile implements Runnable, SensorEventListener {
             float qTimestamp = sensorEvent.timestamp;
             TextView text = (TextView) QUATERNION;
             text.setText("w = " + Q[0] +
-                    "\n x = " + Q[1] +
-                    "\n y = " + Q[2] +
-                    "\n z = " + Q[3] +
-                    "\n timestamp = " + qTimestamp);
+                    "\nx = " + Q[1] +
+                    "\ny = " + Q[2] +
+                    "\nz = " + Q[3] +
+                    "\ntimestamp = " + qTimestamp);
 
             String QuaternionString = Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3];
             lock.lock();

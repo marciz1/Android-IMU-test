@@ -6,14 +6,13 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.SocketException;
+
 
 public class MainActivity extends Activity {
 
@@ -21,8 +20,13 @@ public class MainActivity extends Activity {
     private SaveToFile saveToFile;
 
     private Socket socket;
-    private static final String SERVER_IP = "192.198.0.103";
+
+    private static final String SERVER_IP = "192.198.0.101";
+//    private static final String SERVER_IP = "192.168.100.104";
+
     private static final int SERVERPORT = 4444;
+
+    private Thread save;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,7 +34,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         Log.w("SERVER: ", "logtest");
         View QUATERNION = findViewById(R.id.QUATERNION);
-
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
@@ -40,7 +43,7 @@ public class MainActivity extends Activity {
         saveToFile.init();
 
         new Thread(new ClientThread()).start();
-        new Thread(saveToFile).start();
+//        new Thread(saveToFile).start();
     }
 
     @Override
@@ -78,13 +81,20 @@ public class MainActivity extends Activity {
                     try {
                         in = socket.getInputStream();
                         BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                        String test = br.readLine();
-                        Log.w("SERVER: ", test);
+                        String message = br.readLine();
+                        Log.w("SERVER: ", message);
+                        if (message.equals("START")) {
+                            save = new Thread(saveToFile);
+                            save.start();
+                        }
+                        if (message.equals("STOP")) {
+                            saveToFile.setRunning(false);
+                        }
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-
             }
         }
     }
