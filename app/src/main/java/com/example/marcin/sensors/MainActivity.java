@@ -21,7 +21,7 @@ public class MainActivity extends Activity {
     private Socket socket;
 
     //    private static final String SERVER_IP = "192.168.43.216";
-    private static final String SERVER_IP = "192.168.8.101";
+    private static final String SERVER_IP = "192.168.8.100";
     private static final int SERVERPORT = 4444;
 
     private Thread save;
@@ -45,9 +45,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        saveToFile.deleteFile("quaternion.txt");
         super.onDestroy();
-
     }
 
     @Override
@@ -65,12 +63,18 @@ public class MainActivity extends Activity {
     public class ClientThread implements Runnable {
         @Override
         public void run() {
+            boolean bln = false;
             while (true) {
-                try {
-                    socket = new Socket(SERVER_IP, SERVERPORT);
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+                if(!bln){
+                    try {
+                        socket = new Socket(SERVER_IP, SERVERPORT);
+                        bln = true;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
+
                 InputStream in = null;
                 if (socket != null) {
                     try {
@@ -79,12 +83,8 @@ public class MainActivity extends Activity {
                         String message = br.readLine();
                         Log.w("SERVER: ", message);
                         if (message.equals("START")) {
-                            saveToFile.deleteFile("quaternion.txt");
                             save = new Thread(saveToFile);
                             save.start();
-                        }
-                        if (message.equals("STOP")) {
-                            saveToFile.setRunning(false);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
