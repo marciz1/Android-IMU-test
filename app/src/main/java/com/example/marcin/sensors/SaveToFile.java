@@ -122,6 +122,7 @@ public class SaveToFile implements Runnable, SensorEventListener {
     }
 
     public void run() {
+        deleteFile("quaternion.txt");
         while (isRunning) {
             if (!queue.isEmpty()) {
                 lock.lock();

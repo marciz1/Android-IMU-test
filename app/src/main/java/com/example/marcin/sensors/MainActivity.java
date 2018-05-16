@@ -18,12 +18,10 @@ public class MainActivity extends Activity {
 
     private SensorManager senSensorManager;
     private SaveToFile saveToFile;
-
     private Socket socket;
 
-    private static final String SERVER_IP = "192.198.0.101";
-//    private static final String SERVER_IP = "192.168.100.104";
-
+    //    private static final String SERVER_IP = "192.168.43.216";
+    private static final String SERVER_IP = "192.168.8.101";
     private static final int SERVERPORT = 4444;
 
     private Thread save;
@@ -43,11 +41,11 @@ public class MainActivity extends Activity {
         saveToFile.init();
 
         new Thread(new ClientThread()).start();
-//        new Thread(saveToFile).start();
     }
 
     @Override
     protected void onDestroy() {
+        saveToFile.deleteFile("quaternion.txt");
         super.onDestroy();
 
     }
@@ -55,7 +53,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        saveToFile.deleteFile("quaternion.txt");
         saveToFile.registerListeners();
     }
 
@@ -65,39 +62,36 @@ public class MainActivity extends Activity {
         saveToFile.unregisterListeners();
     }
 
-    public class ClientThread implements Runnable{
-
+    public class ClientThread implements Runnable {
         @Override
-        public void run(){
-            while(true) {
+        public void run() {
+            while (true) {
                 try {
                     socket = new Socket(SERVER_IP, SERVERPORT);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 InputStream in = null;
-                if(socket != null) {
+                if (socket != null) {
                     try {
                         in = socket.getInputStream();
                         BufferedReader br = new BufferedReader(new InputStreamReader(in));
                         String message = br.readLine();
                         Log.w("SERVER: ", message);
                         if (message.equals("START")) {
+                            saveToFile.deleteFile("quaternion.txt");
                             save = new Thread(saveToFile);
                             save.start();
                         }
                         if (message.equals("STOP")) {
                             saveToFile.setRunning(false);
                         }
-
                     } catch (IOException e) {
                         e.printStackTrace();
+                        saveToFile.setRunning(false);
                     }
                 }
             }
         }
     }
 }
-
-
