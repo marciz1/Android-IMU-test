@@ -8,6 +8,7 @@ import android.hardware.SensorManager;
 import android.os.Environment;
 import android.view.View;
 import android.widget.TextView;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -36,6 +37,10 @@ public class SaveToFile implements Runnable, SensorEventListener {
     private Sensor senOrientation;
 
     private float[] Q = new float[4];
+    private float[] A = new float[4];
+    private float[] G = new float[4];
+    private float[] M = new float[4];
+
     private Queue<String> queue = new LinkedList<>();
 
     private String message;
@@ -91,18 +96,39 @@ public class SaveToFile implements Runnable, SensorEventListener {
 
     public void getValues(SensorEvent sensorEvent) {
 
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            A[0] = sensorEvent.values[0];
+            A[1] = sensorEvent.values[1];
+            A[2] = sensorEvent.values[2];
+            A[3] = sensorEvent.timestamp;
+        }
+
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            G[0] = sensorEvent.values[0];
+            G[1] = sensorEvent.values[1];
+            G[2] = sensorEvent.values[2];
+            G[3] = sensorEvent.timestamp;
+        }
+
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            M[0] = sensorEvent.values[0];
+            M[1] = sensorEvent.values[1];
+            M[2] = sensorEvent.values[2];
+            M[3] = sensorEvent.timestamp;
+        }
+
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
 
             SensorManager.getQuaternionFromVector(Q, sensorEvent.values);
             float qTimestamp = sensorEvent.timestamp;
             TextView text = (TextView) QUATERNION;
-            text.setText("w = " + Q[0] +
-                    "\nx = " + Q[1] +
-                    "\ny = " + Q[2] +
-                    "\nz = " + Q[3] +
-                    "\ntimestamp = " + qTimestamp);
+            text.setText("w = " + Q[0] + "\nx = " + Q[1] + "\ny = " + Q[2] + "\nz = " + Q[3] + "\ntimestamp = " + qTimestamp);
 
-            String QuaternionString = Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3];
+            String QuaternionString = "Q " + Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3] + ", " + qTimestamp + "\n"
+                    + "A " + A[0] + ", " + A[1] + ", " + A[2] + ", " + A[3] + "\n"
+                    + "G " + G[0] + ", " + G[1] + ", " + G[2] + ", " + G[3] + "\n"
+                    + "M " + M[0] + ", " + M[1] + ", " + M[2] + ", " + M[3] + "\n";
+
             lock.lock();
             try {
                 queue.add(QuaternionString);
@@ -155,7 +181,7 @@ public class SaveToFile implements Runnable, SensorEventListener {
         }
     }
 
-    public void deleteFile(String fileName){
+    public void deleteFile(String fileName) {
         File txtFile = new File(Environment.getExternalStorageDirectory() + "/IMU/" + fileName);
         txtFile.delete();
     }

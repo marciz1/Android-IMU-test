@@ -21,7 +21,8 @@ public class MainActivity extends Activity {
     private Socket socket;
 
     //    private static final String SERVER_IP = "192.168.43.216";
-    private static final String SERVER_IP = "192.168.8.100";
+    private static final String SERVER_IP = "192.168.43.216";
+
     private static final int SERVERPORT = 4444;
 
     private Thread save;
