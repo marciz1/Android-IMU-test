@@ -37,9 +37,18 @@ public class SaveToFile implements Runnable, SensorEventListener {
     private Sensor senOrientation;
 
     private float[] Q = new float[4];
-    private float[] A = new float[4];
-    private float[] G = new float[4];
-    private float[] M = new float[4];
+    private float[] A = new float[3];
+    private float[] G = new float[3];
+    private float[] M = new float[3];
+    long accTim;
+    long gyroTim;
+    long magnTim;
+
+    private String acc;
+    private String gyro;
+    private String magn;
+    private String quaternion;
+
 
     private Queue<String> queue = new LinkedList<>();
 
@@ -100,34 +109,42 @@ public class SaveToFile implements Runnable, SensorEventListener {
             A[0] = sensorEvent.values[0];
             A[1] = sensorEvent.values[1];
             A[2] = sensorEvent.values[2];
-            A[3] = sensorEvent.timestamp;
+            accTim = sensorEvent.timestamp;
+            acc = String.format ("%.20f, %.20f, %.20f, %d", A[0], A[1], A[2], accTim);
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
             G[0] = sensorEvent.values[0];
             G[1] = sensorEvent.values[1];
             G[2] = sensorEvent.values[2];
-            G[3] = sensorEvent.timestamp;
+            gyroTim = sensorEvent.timestamp;
+            gyro = String.format ("%.20f, %.20f, %.20f, %d ", G[0], G[1], G[2], gyroTim);
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             M[0] = sensorEvent.values[0];
             M[1] = sensorEvent.values[1];
             M[2] = sensorEvent.values[2];
-            M[3] = sensorEvent.timestamp;
+            magnTim = sensorEvent.timestamp;
+            magn = String.format ("%.20f, %.20f, %.20f, %d ", M[0], M[1], M[2], magnTim);
         }
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
 
             SensorManager.getQuaternionFromVector(Q, sensorEvent.values);
-            float qTimestamp = sensorEvent.timestamp;
+            long qTimestamp = sensorEvent.timestamp;
             TextView text = (TextView) QUATERNION;
             text.setText("w = " + Q[0] + "\nx = " + Q[1] + "\ny = " + Q[2] + "\nz = " + Q[3] + "\ntimestamp = " + qTimestamp);
-
-            String QuaternionString = "Q " + Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3] + ", " + qTimestamp + "\n"
-                    + "A " + A[0] + ", " + A[1] + ", " + A[2] + ", " + A[3] + "\n"
-                    + "G " + G[0] + ", " + G[1] + ", " + G[2] + ", " + G[3] + "\n"
-                    + "M " + M[0] + ", " + M[1] + ", " + M[2] + ", " + M[3] + "\n";
+            quaternion = String.format ("%.20f, %.20f, %.20f, %.20f, %d ", Q[0], Q[1], Q[2], Q[3], magnTim);
+//            String QuaternionString = "Q " + Q[0] + ", " + Q[1] + ", " + Q[2] + ", " + Q[3] + ", " + qTimestamp + "\n"
+//                    + "A " + A[0] + ", " + A[1] + ", " + A[2] + ", " + accTim + "\n"
+//                    + "G " + G[0] + ", " + G[1] + ", " + G[2] + ", " + gyroTim + "\n"
+//                    + "M " + M[0] + ", " + M[1] + ", " + M[2] + ", " + magnTim + "\n";
+//
+           String QuaternionString = "Q " + quaternion + "\n"
+                    + "A " + acc + "\n"
+                    + "G " + gyro + "\n"
+                    + "M " + magn + "\n";
 
             lock.lock();
             try {

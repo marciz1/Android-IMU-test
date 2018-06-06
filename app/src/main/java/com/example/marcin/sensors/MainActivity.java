@@ -20,8 +20,8 @@ public class MainActivity extends Activity {
     private SaveToFile saveToFile;
     private Socket socket;
 
-    //    private static final String SERVER_IP = "192.168.43.216";
-    private static final String SERVER_IP = "192.168.43.216";
+//    private static final String SERVER_IP = "192.168.100.105";
+    private static final String SERVER_IP = "192.168.8.102";
 
     private static final int SERVERPORT = 4444;
 
